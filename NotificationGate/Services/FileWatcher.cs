@@ -2,9 +2,11 @@
 using Microsoft.Extensions.Logging;
 using System.IO;
 
+
+
 namespace NotificationGate.Services;
 
-public class FileWatcher
+public class FileWatcher: BackgroundService
 {
     private readonly string _inputFilpath =
         @"C:\Users\EHRE14\source\repos\KolAman\alert-simulator\alert-simulator\alerts";
@@ -20,7 +22,6 @@ public class FileWatcher
         _alertProcessor = alertProcessor;
         _logger = logger;
 
-
         _watcher = new FileSystemWatcher(_inputFilpath)
         {
             NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime,
@@ -30,15 +31,19 @@ public class FileWatcher
             IncludeSubdirectories = true,
             InternalBufferSize = 65536
         };
+    }
+
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
 
         _watcher.Created += OnReadyFileCreated;
-    }
 
-    public void Start()
-    {
         _watcher.EnableRaisingEvents = true;
         _watcher.IncludeSubdirectories = true;
+
+        return Task.CompletedTask;
     }
+
 
 
     private async void OnReadyFileCreated(object sender, FileSystemEventArgs e)
@@ -50,7 +55,7 @@ public class FileWatcher
 
             var directory = Path.GetDirectoryName(e.FullPath);
 
-            var jsonFilePath =  Path.Combine(directory!, $"{baseFileName}.json");
+            var jsonFilePath = Path.Combine(directory!, $"{baseFileName}.json");
 
             string? targetFilePath = null;
 
@@ -69,16 +74,11 @@ public class FileWatcher
             File.Delete(e.FullPath);
             File.Delete(targetFilePath!);
 
-            
+
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
-    }
-
-    public void Stop()
-    {
-        _watcher.EnableRaisingEvents = false;
     }
 }

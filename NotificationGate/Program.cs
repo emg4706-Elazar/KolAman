@@ -31,9 +31,7 @@ public class Program
 
         builder.Services.AddSingleton<KafkaProducerService>();
 
-        builder.Services.AddSingleton<FileWatcher>();
-
-        builder.Services.AddHostedService<WorkerService>();
+        builder.Services.AddHostedService<FileWatcher>();
 
         builder.Services.AddSingleton<JsonReaderService>();
 
