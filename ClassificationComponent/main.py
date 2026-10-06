@@ -1,8 +1,7 @@
 from confluent_kafka import Consumer, KafkaException
 from classification import get_region_with_geopandas
 import json
-from publisher import publish
-
+from publisher import publish, connection
 
 filepath = r"C:\Users\EHRE14\source\repos\KolAman\alert-simulator\alert-simulator\regions.geojson"
 topic_name = "alerts"
@@ -39,6 +38,7 @@ try:
 
 finally:
     consumer.close()
+    connection.close()
 
 
 
