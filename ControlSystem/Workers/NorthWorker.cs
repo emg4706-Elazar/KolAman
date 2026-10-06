@@ -1,29 +1,25 @@
 ﻿using ControlSystem.Configuration;
+using ControlSystem.Models;
+using ControlSystem.Repositories;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using System.Text.Json;
 
 namespace ControlSystem.Workers;
 
-public class NorthWorker: BackgroundService
+
+public class NorthWorker : BackgroundService
 {
-    private readonly RabbitOptions _options;
-
-    public NorthWorker(
-        RabbitOptions options)
-    {
-        _options = options;
-    }
-
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var factory = new ConnectionFactory
         {
             HostName = "localhost",
-            UserName = "guest",
-            Password = "guest"
+            UserName = "app",
+            Password = "secret"
         };
 
         using var connection = await factory.CreateConnectionAsync();
@@ -31,7 +27,7 @@ public class NorthWorker: BackgroundService
 
 
         await channel.QueueDeclareAsync(
-            queue: _queueName,
+            queue: "north",
             durable: true,
             exclusive: false,
             autoDelete:
@@ -53,20 +49,18 @@ public class NorthWorker: BackgroundService
         {
             byte[] body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
-            Console.WriteLine($" [x] Received {message}");
+
+            Console.WriteLine($" [x] Received message {message} from 'north'");
+
 
             int dots = message.Split('.').Length - 1;
             await Task.Delay(dots * 1000);
 
             Console.WriteLine(" [x] Done");
 
-            // here channel could also be accessed as ((AsyncEventingBasicConsumer)sender).Channel
             await channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
         };
 
-        await channel.BasicConsumeAsync("task_queue", autoAck: false, consumer: consumer);
-
-        Console.WriteLine(" Press [enter] to exit.");
-        Console.ReadLine();
+        await channel.BasicConsumeAsync("north", autoAck: false, consumer: consumer);
     }
 }
