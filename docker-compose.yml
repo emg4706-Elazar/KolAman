@@ -1,0 +1,14 @@
+services:
+  kafka:
+    image: apache/kafka:latest
+    container_name: broker
+    ports:
+      - "9092:9092"
+
+  
+  rabbitmq:
+    image: rabbitmq:4.3.6-management
+    hostname: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
