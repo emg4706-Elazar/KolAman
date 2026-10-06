@@ -23,10 +23,10 @@ public class Alert
     public string? Classification { get; set; }
 
     [JsonPropertyName("lat")]
-    public string? lat { get; set; }
+    public float lat { get; set; }
 
     [JsonPropertyName("lon")]
-    public string? Lon { get; set; }
+    public float Lon { get; set; }
 
     [JsonPropertyName("timestamp")]
     public string? Timestamp { get; set; }
